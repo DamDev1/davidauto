@@ -1,0 +1,127 @@
+'use client';
+
+import { createContext, useContext, ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import { setCredentials, logout as logoutAction } from '@/slices/authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { useCreateCarMutation, useLoginMutation, useRegisterMutation, useUploadImagesMutation, useVerifyEmailMutation, useResendOtpMutation } from '@/slices/usersApiSlice';
+import toast from 'react-hot-toast';
+
+export interface User {
+    id: string;
+    name: string;
+    email: string;
+    role: string;
+    profilePhotoUrl?: string;
+}
+
+interface AuthContextType {
+    user: User | null;
+    token: string | null;
+    isLoading: boolean;
+    login: (email: string, password: string) => Promise<void>;
+    logout: () => void;
+    register: (fullName: string, email: string, password: string, dealershipName: string,) => Promise<void>;
+    uploadImages: (images: File[]) => Promise<string[]>;
+    createCar: (carData: any) => Promise<void>;
+    verifyOtp: (email: string, otp: string) => Promise<void>;
+    resendOtp: (email: string) => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+    const { userInfo: user, token } = useSelector((state: any) => state.auth);
+    const [loginMutation, { isLoading }] = useLoginMutation();
+    const [registerMutation, { isLoading: isRegistering }] = useRegisterMutation();
+    const [createCarMutation, { isLoading: isCreatingCar }] = useCreateCarMutation();
+    const [uploadImagesMutation, { isLoading: isUploadingImages }] = useUploadImagesMutation();
+    const [verifyOtpMutation, { isLoading: isVerifyingOtp }] = useVerifyEmailMutation();
+    const [resendOtpMutation, { isLoading: isResendingOtp }] = useResendOtpMutation();
+    const dispatch = useDispatch();
+    const router = useRouter();
+
+    const login = async (email: string, password: string) => {
+        try {
+            const res = await loginMutation({ email, password }).unwrap();
+            console.log(res);
+            dispatch(setCredentials({
+                userInfo: res.dealer || res.admin,
+                token: res.accessToken,
+                refreshToken: res.refreshToken
+            }));
+            router.push('/dashboard');
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Login failed. Please try again.");
+            throw error;
+        }
+    };
+
+    const register = async (fullName: string, email: string, password: string, dealershipName: string) => {
+        try {
+            await registerMutation({ fullName, email, password, dealershipName }).unwrap();
+        } catch (error) {
+            console.error('Failed to register', error);
+            throw error;
+        }
+    };
+
+    const verifyOtp = async (email: string, otp: string) => {
+        try {
+            await verifyOtpMutation({ email, otp }).unwrap();
+            router.push('/login');
+        } catch (error) {
+            console.error('Failed to verify OTP', error);
+            throw error;
+        }
+    };
+
+    const resendOtp = async (email: string) => {
+        try {
+            await resendOtpMutation({ email }).unwrap();
+        } catch (error) {
+            console.error('Failed to resend OTP', error);
+            throw error;
+        }
+    };
+
+    const createCar = async (carData: any) => {
+        try {
+            await createCarMutation(carData).unwrap();
+        } catch (error) {
+            console.error('Failed to create car', error);
+            throw error;
+        }
+    };
+
+    const uploadImages = async (images: File[]) => {
+        try {
+            const formData = new FormData();
+            images.forEach((image) => formData.append('images', image));
+            const result = await uploadImagesMutation(formData).unwrap();
+            return result.urls; // From /api/upload-images backend
+        } catch (error) {
+            console.error('Failed to upload images', error);
+            throw error;
+        }
+    };
+
+    const logout = () => {
+        dispatch(logoutAction());
+        router.push('/login');
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, token, isLoading: isLoading || isRegistering || isCreatingCar || isUploadingImages || isVerifyingOtp || isResendingOtp, login, logout, register, createCar, uploadImages, verifyOtp, resendOtp }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => {
+    const context = useContext(AuthContext);
+    if (context === undefined) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
+};
