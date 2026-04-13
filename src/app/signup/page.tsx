@@ -22,11 +22,9 @@ export default function SignupPage() {
 
     const [step, setStep] = useState<Step>("form");
 
-
     return (
         <GuestRoute>
             <div className="relative min-h-[calc(100vh-80px)] w-full flex items-center justify-center overflow-hidden py-12">
-                {/* Background */}
                 <div className="absolute inset-0 z-0">
                     <Image
                         src="https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?q=80&w=2000&auto=format&fit=crop"
