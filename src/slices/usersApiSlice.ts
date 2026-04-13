@@ -48,6 +48,12 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 method: 'GET',
             }),
         }),
+        getMyCars: builder.query({
+            query: () => ({
+                url: '/cars/my-cars',
+                method: 'GET',
+            }),
+        }),
 
         getCarById: builder.query({
             query: (carId) => ({
@@ -66,4 +72,4 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useUploadImagesMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;
+export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useUploadImagesMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;

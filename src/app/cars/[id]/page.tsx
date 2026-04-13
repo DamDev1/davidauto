@@ -18,10 +18,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { CarProps } from "@/components/CarCard";
 import { useGetCarByIdQuery } from "@/slices/usersApiSlice";
-
-
 
 export default function CarDetailsPage() {
   const params = useParams();
@@ -44,6 +41,15 @@ export default function CarDetailsPage() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="h-80 rounded-2xl bg-secondary/20 animate-pulse border border-border/50" />
+        ))}
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col min-h-screen pt-16 bg-background">

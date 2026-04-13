@@ -7,76 +7,28 @@ import {
   Search,
   MoreVertical,
   Edit,
-  Trash2,
   Eye,
   CheckCircle,
-  Clock,
   CarFront,
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
-
-// Dummy data for user's cars
-const MY_CARS = [
-  {
-    id: "car-1",
-    make: "Mercedes-Benz",
-    model: "G-Class AMG G 63",
-    year: 2023,
-    price: 185000,
-    image:
-      "https://images.unsplash.com/photo-1520031441872-265e4ff70366?q=80&w=1000&auto=format&fit=crop",
-    status: "Active",
-    views: 1240,
-    inquiries: 3,
-  },
-  {
-    id: "car-2",
-    make: "Porsche",
-    model: "911 Carrera S",
-    year: 2024,
-    price: 135000,
-    image:
-      "https://images.unsplash.com/photo-1503376713356-1a3b115450c9?q=80&w=1000&auto=format&fit=crop",
-    status: "Active",
-    views: 890,
-    inquiries: 1,
-  },
-  {
-    id: "car-3",
-    make: "Land Rover",
-    model: "Range Rover Sport",
-    year: 2023,
-    price: 95000,
-    image:
-      "https://images.unsplash.com/photo-1563720225384-9c0f4ffcbd86?q=80&w=1000&auto=format&fit=crop",
-    status: "Pending",
-    views: 2100,
-    inquiries: 8,
-  },
-  {
-    id: "car-4",
-    make: "BMW",
-    model: "M4 Competition",
-    year: 2022,
-    price: 82000,
-    image:
-      "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=1000&auto=format&fit=crop",
-    status: "Sold",
-    views: 3400,
-    inquiries: 12,
-  },
-];
+import { useGetMyCarsQuery } from "@/slices/usersApiSlice";
 
 export default function ManageCarsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState("All");
+  const { data, isLoading, isError } = useGetMyCarsQuery({});
 
-  const filteredCars = MY_CARS.filter((car) => {
+  const cars = data?.cars || [];
+
+  const filteredCars = cars.filter((car: any) => {
     const matchesSearch = `${car.make} ${car.model}`
       .toLowerCase()
       .includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === "All" || car.status === activeTab;
+    const matchesTab =
+      activeTab === "All" ||
+      (activeTab === "Active" && car.status === "available") ||
+      (activeTab === "Sold" && car.status === "sold");
     return matchesSearch && matchesTab;
   });
 
@@ -100,18 +52,16 @@ export default function ManageCarsPage() {
         </Link>
       </div>
 
-      {/* Filters and Search */}
       <div className="flex flex-col md:flex-row gap-4 justify-between">
         <div className="flex bg-secondary/50 rounded-xl p-1 w-full md:w-auto overflow-x-auto hide-scrollbar">
-          {["All", "Active", "Pending", "Sold"].map((tab) => (
+          {["All", "Active", "Sold"].map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === tab
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-              }`}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                }`}
             >
               {tab}
             </button>
@@ -132,87 +82,95 @@ export default function ManageCarsPage() {
         </div>
       </div>
 
-      {/* Cars Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-        {filteredCars.map((car, i) => (
-          <motion.div
-            key={car.id}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.1, duration: 0.4 }}
-            className="bg-card/50 backdrop-blur-md border border-border/50 rounded-2xl overflow-hidden group hover:border-border transition-colors"
-          >
-            <div className="relative h-48 w-full">
-              <Image
-                src={car.image}
-                alt={`${car.year} ${car.make} ${car.model}`}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute top-3 right-3">
-                <div
-                  className={`px-2.5 py-1 text-xs font-semibold rounded-full backdrop-blur-md flex items-center gap-1 ${
-                    car.status === "Active"
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {[1, 2, 3].map((n) => (
+            <div key={n} className="h-80 rounded-2xl bg-secondary/20 animate-pulse border border-border/50" />
+          ))}
+        </div>
+      ) : isError ? (
+        <div className="text-center py-24 bg-destructive/5 border border-destructive/20 rounded-2xl">
+          <p className="text-destructive font-medium">Failed to load vehicles. Please try again later.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {filteredCars.map((car: any, i: number) => (
+            <motion.div
+              key={car._id}
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: i * 0.1, duration: 0.4 }}
+              className="bg-card/50 backdrop-blur-md border border-border/50 rounded-2xl overflow-hidden group hover:border-border transition-colors"
+            >
+              <div className="relative w-full">
+                <div className="">
+                  <img
+                    src={car.images?.[0]}
+                    alt={`${car.year} ${car.make} ${car.model}`}
+                    width={500}
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+                <div className="absolute top-3 right-3">
+                  <div
+                    className={`px-2.5 py-1 text-xs font-semibold rounded-full backdrop-blur-md flex items-center gap-1 ${car.status === "available"
                       ? "bg-green-500/20 text-green-300 border border-green-500/30"
-                      : car.status === "Pending"
-                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                        : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
-                  }`}
-                >
-                  {car.status === "Active" && (
-                    <CheckCircle className="w-3 h-3" />
-                  )}
-                  {car.status === "Pending" && <Clock className="w-3 h-3" />}
-                  {car.status}
-                </div>
-              </div>
-            </div>
-
-            <div className="p-5">
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">
-                    {car.year} {car.make} {car.model}
-                  </h3>
-                  <p className="text-xl font-semibold text-primary mt-1">
-                    ${car.price.toLocaleString()}
-                  </p>
-                </div>
-
-                {/* Actions Dropdown Placeholder - usually uses a Radix UI component */}
-                <button className="p-2 text-muted-foreground hover:bg-secondary rounded-lg transition-colors">
-                  <MoreVertical className="w-5 h-5" />
-                </button>
-              </div>
-
-              <div className="flex items-center gap-4 py-4 border-t border-border/50 mt-4">
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Eye className="w-4 h-4" />
-                  <span>{car.views} Views</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <CheckCircle className="w-4 h-4" />
-                  <span>{car.inquiries} Inquiries</span>
+                      : "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                      }`}
+                  >
+                    {car.status === "available" && (
+                      <CheckCircle className="w-3 h-3" />
+                    )}
+                    {car.status === "available" ? "Active" : "Sold"}
+                  </div>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 mt-2">
-                <Link
-                  href={`/cars/${car.id}`}
-                  className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium"
-                >
-                  <Eye className="w-4 h-4" />
-                  Preview
-                </Link>
-                <button className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium">
-                  <Edit className="w-4 h-4" />
-                  Edit
-                </button>
+              <div className="p-5">
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h3 className="text-lg font-bold text-foreground">
+                      {car.year} {car.make} {car.model}
+                    </h3>
+                    <p className="text-xl font-semibold text-primary mt-1">
+                      ${car.price.toLocaleString()}
+                    </p>
+                  </div>
+
+                  <button className="p-2 text-muted-foreground hover:bg-secondary rounded-lg transition-colors">
+                    <MoreVertical className="w-5 h-5" />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-4 py-4 border-t border-border/50 mt-4">
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Eye className="w-4 h-4" />
+                    <span>{car.views || 0} Views</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <CheckCircle className="w-4 h-4" />
+                    <span>0 Inquiries</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <Link
+                    href={`/cars/${car._id}`}
+                    className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium"
+                  >
+                    <Eye className="w-4 h-4" />
+                    Preview
+                  </Link>
+                  <button className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium">
+                    <Edit className="w-4 h-4" />
+                    Edit
+                  </button>
+                </div>
               </div>
-            </div>
-          </motion.div>
-        ))}
-      </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
 
       {filteredCars.length === 0 && (
         <div className="text-center py-24 bg-card/50 border border-dashed border-border/50 rounded-2xl">

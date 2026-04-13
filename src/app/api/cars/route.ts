@@ -2,14 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import Car from '@/models/Car';
 import { verifyAccessToken } from '@/lib/auth';
-import { writeFile, mkdir } from 'fs/promises';
-import path from 'path';
 
 export async function POST(req: NextRequest) {
     try {
         await connectDB();
 
-        // 1. Verify Authentication
         const authHeader = req.headers.get('authorization');
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
             return NextResponse.json({ success: false, message: 'Unauthorized. Please login.' }, { status: 401 });
@@ -21,7 +18,6 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, message: 'Unauthorized. Only dealers can add cars.' }, { status: 403 });
         }
 
-        // 2. Parse JSON body
         const body = await req.json();
 
         const {
@@ -41,18 +37,15 @@ export async function POST(req: NextRequest) {
             images,
         } = body;
 
-        // Basic validation
         if (!make || !model || !year || !price || !vin || !color || !engineSize || !location) {
             return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
         }
 
-        // Check for duplicate VIN
         const existingCar = await Car.findOne({ vin: vin.trim() });
         if (existingCar) {
             return NextResponse.json({ success: false, message: 'A car with this VIN already exists.' }, { status: 409 });
         }
 
-        // 4. Save to Database
         const newCar = await Car.create({
             dealerId: decoded.userId,
             make: make.trim(),
