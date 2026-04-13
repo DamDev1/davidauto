@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { setCredentials, logout as logoutAction } from '@/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
@@ -41,6 +41,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const dispatch = useDispatch();
     const router = useRouter();
 
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const stored = localStorage.getItem('admin-auth');
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    if (parsed.token) {
+                        dispatch(setCredentials({
+                            userInfo: parsed.userInfo,
+                            token: parsed.token,
+                            refreshToken: parsed.refreshToken
+                        }));
+                    }
+                } catch (err) {
+                    console.error("Failed to parse stored auth", err);
+                }
+            }
+        }
+    }, [dispatch]);
+
     const login = async (email: string, password: string) => {
         try {
             const res = await loginMutation({ email, password }).unwrap();
@@ -60,8 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const register = async (fullName: string, email: string, password: string, dealershipName: string) => {
         try {
             await registerMutation({ fullName, email, password, dealershipName }).unwrap();
-        } catch (error) {
-            console.error('Failed to register', error);
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Registration failed. Please try again.");
             throw error;
         }
     };
@@ -70,8 +90,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         try {
             await verifyOtpMutation({ email, otp }).unwrap();
             router.push('/login');
-        } catch (error) {
-            console.error('Failed to verify OTP', error);
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Verification failed. Please try again.");
             throw error;
         }
     };
@@ -79,8 +99,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const resendOtp = async (email: string) => {
         try {
             await resendOtpMutation({ email }).unwrap();
-        } catch (error) {
-            console.error('Failed to resend OTP', error);
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to resend OTP. Please try again.");
             throw error;
         }
     };
@@ -88,8 +108,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const createCar = async (carData: any) => {
         try {
             await createCarMutation(carData).unwrap();
-        } catch (error) {
-            console.error('Failed to create car', error);
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to create car. Please try again.");
             throw error;
         }
     };
@@ -100,8 +120,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             images.forEach((image) => formData.append('images', image));
             const result = await uploadImagesMutation(formData).unwrap();
             return result.urls; // From /api/upload-images backend
-        } catch (error) {
-            console.error('Failed to upload images', error);
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to upload images. Please try again.");
             throw error;
         }
     };

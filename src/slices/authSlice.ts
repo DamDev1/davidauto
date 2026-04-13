@@ -13,17 +13,11 @@ interface AuthState {
     refreshToken: string | null;
 }
 
-const getStoredAuth = (): AuthState => {
-    if (typeof window === 'undefined') return { userInfo: null, token: null, refreshToken: null };
-    try {
-        const stored = localStorage.getItem('admin-auth');
-        return stored ? JSON.parse(stored) : { userInfo: null, token: null, refreshToken: null };
-    } catch {
-        return { userInfo: null, token: null, refreshToken: null };
-    }
+const initialState: AuthState = {
+    userInfo: null,
+    token: null,
+    refreshToken: null,
 };
-
-const initialState: AuthState = getStoredAuth();
 
 const authSlice = createSlice({
     name: 'auth',
@@ -48,10 +42,6 @@ const authSlice = createSlice({
 
             if (typeof window !== 'undefined') {
                 localStorage.removeItem('admin-auth');
-                // Cleanup legacy keys if any
-                localStorage.removeItem('producerDetails');
-                localStorage.removeItem('role');
-                localStorage.removeItem('userDetails');
             }
         },
     },

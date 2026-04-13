@@ -49,6 +49,13 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
+        getCarById: builder.query({
+            query: (carId) => ({
+                url: `/cars/${carId}`,
+                method: 'GET',
+            }),
+        }),
+
         uploadImages: builder.mutation({
             query: (data) => ({
                 url: 'upload-images',
@@ -59,4 +66,4 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useUploadImagesMutation, useResendOtpMutation } = usersApiSlice;
+export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useUploadImagesMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;

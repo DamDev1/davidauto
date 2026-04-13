@@ -5,18 +5,17 @@ import Dealer from '@/models/Dealer'; // Import to ensure it's registered for po
 
 export async function GET(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         await connectDB();
 
-        const carId = params.id;
+        const { id: carId } = await params;
 
         if (!carId) {
             return NextResponse.json({ success: false, message: 'Car ID is required' }, { status: 400 });
         }
 
-        // We populate the dealerId to get the dealer's info so buyers know who to contact
         const car = await Car.findById(carId).populate({
             path: 'dealerId',
             select: 'fullName email dealershipName phoneNumber',
