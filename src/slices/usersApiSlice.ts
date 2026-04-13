@@ -69,7 +69,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 body: data,
             }),
         }),
+        updateCar: builder.mutation({
+            query: ({ id, ...data }) => ({
+                url: `/cars/${id}`,
+                method: 'PUT',
+                body: data,
+            }),
+        }),
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useUploadImagesMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;
+export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useUploadImagesMutation, useUpdateCarMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;

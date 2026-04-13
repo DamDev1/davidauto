@@ -161,10 +161,13 @@ export default function ManageCarsPage() {
                     <Eye className="w-4 h-4" />
                     Preview
                   </Link>
-                  <button className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium">
+                  <Link
+                    href={`/dashboard/cars/edit/${car._id}`}
+                    className="flex items-center justify-center gap-2 py-2 px-3 rounded-lg bg-secondary/50 text-foreground hover:bg-secondary transition-colors text-sm font-medium"
+                  >
                     <Edit className="w-4 h-4" />
                     Edit
-                  </button>
+                  </Link>
                 </div>
               </div>
             </motion.div>

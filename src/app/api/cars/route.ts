@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
             description: description.trim(),
             features: features || [],
             images: images || [],
-            status: 'avaliable', // Set as avaliable by default per the schema
+            status: 'available', // Set as available by default per the schema
         });
 
         return NextResponse.json({

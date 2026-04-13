@@ -9,10 +9,16 @@ import { useGetCarsQuery } from "@/slices/usersApiSlice";
 
 
 export default function Home() {
-  const {data,isLoading,error}=useGetCarsQuery({})
+  const { data, isLoading, error } = useGetCarsQuery({})
 
-  if(isLoading){
-    return <div>Loading...</div>
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        {[1, 2, 3].map((n) => (
+          <div key={n} className="h-80 rounded-2xl bg-secondary/20 animate-pulse border border-border/50" />
+        ))}
+      </div>
+    )
   }
 
   return (
@@ -108,7 +114,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {data?.cars?.map((car:any, i:number) => (
+            {data?.cars?.map((car: any, i: number) => (
               <motion.div
                 key={car.id}
                 initial={{ opacity: 0, y: 20 }}
