@@ -11,41 +11,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-
-const STATS = [
-  {
-    name: "Active Listings",
-    value: "12",
-    change: "+2 this month",
-    icon: CarFront,
-    color: "text-blue-500",
-    bg: "bg-blue-500/10",
-  },
-  {
-    name: "Total Views",
-    value: "24.5K",
-    change: "+14% vs last mo",
-    icon: Eye,
-    color: "text-green-500",
-    bg: "bg-green-500/10",
-  },
-  {
-    name: "New Inquiries",
-    value: "8",
-    change: "4 pending replies",
-    icon: MessageSquare,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-  },
-  {
-    name: "Sales Volume",
-    value: "$485K",
-    change: "+$120K this year",
-    icon: TrendingUp,
-    color: "text-purple-500",
-    bg: "bg-purple-500/10",
-  },
-];
+import { useGetDashboardStatsQuery } from "@/slices/usersApiSlice";
 
 const RECENT_ACTIVITY = [
   {
@@ -83,6 +49,44 @@ const RECENT_ACTIVITY = [
 ];
 
 export default function DashboardOverview() {
+  const { data, isLoading } = useGetDashboardStatsQuery({});
+  const stats = data?.stats;
+
+  const displayStats = [
+    {
+      name: "Active Listings",
+      value: stats?.activeListings?.toString() || "0",
+      change: "Live inventory",
+      icon: CarFront,
+      color: "text-blue-500",
+      bg: "bg-blue-500/10",
+    },
+    {
+      name: "Total Views",
+      value: stats?.totalViews?.toLocaleString() || "0",
+      change: "All-time visibility",
+      icon: Eye,
+      color: "text-green-500",
+      bg: "bg-green-500/10",
+    },
+    {
+      name: "New Inquiries",
+      value: stats?.newInquiries?.toString() || "0",
+      change: "Coming soon",
+      icon: MessageSquare,
+      color: "text-amber-500",
+      bg: "bg-amber-500/10",
+    },
+    {
+      name: "Sales Volume",
+      value: `$${(stats?.salesVolume || 0).toLocaleString()}`,
+      change: "Total revenue",
+      icon: TrendingUp,
+      color: "text-purple-500",
+      bg: "bg-purple-500/10",
+    },
+  ];
+
   return (
     <div className="space-y-8">
       <div>
@@ -96,33 +100,39 @@ export default function DashboardOverview() {
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        {STATS.map((stat, i) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div
-              key={stat.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.1, duration: 0.4 }}
-              className="bg-card/50 backdrop-blur-md border border-border/50 rounded-2xl p-6"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`p-3 rounded-xl ${stat.bg}`}>
-                  <Icon className={`w-6 h-6 ${stat.color}`} />
+        {isLoading ? (
+          [1, 2, 3, 4].map((n) => (
+            <div key={n} className="h-40 rounded-2xl bg-secondary/20 animate-pulse border border-border/50" />
+          ))
+        ) : (
+          displayStats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1, duration: 0.4 }}
+                className="bg-card/50 backdrop-blur-md border border-border/50 rounded-2xl p-6"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className={`p-3 rounded-xl ${stat.bg}`}>
+                    <Icon className={`w-6 h-6 ${stat.color}`} />
+                  </div>
                 </div>
-              </div>
-              <h3 className="text-muted-foreground text-sm font-medium mb-1">
-                {stat.name}
-              </h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold">{stat.value}</span>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                {stat.change}
-              </p>
-            </motion.div>
-          );
-        })}
+                <h3 className="text-muted-foreground text-sm font-medium mb-1">
+                  {stat.name}
+                </h3>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-3xl font-bold">{stat.value}</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  {stat.change}
+                </p>
+              </motion.div>
+            );
+          })
+        )}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
@@ -206,17 +216,16 @@ export default function DashboardOverview() {
           </div>
 
           <div className="space-y-6">
-            {RECENT_ACTIVITY.map((activity) => (
+            {RECENT_ACTIVITY.map((activity: any) => (
               <div key={activity.id} className="flex gap-4">
                 <div className="relative mt-1">
                   <div
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      activity.type === "inquiry"
-                        ? "bg-amber-500"
-                        : activity.type === "view"
-                          ? "bg-green-500"
-                          : "bg-blue-500"
-                    }`}
+                    className={`w-2.5 h-2.5 rounded-full ${activity.type === "inquiry"
+                      ? "bg-amber-500"
+                      : activity.type === "view"
+                        ? "bg-green-500"
+                        : "bg-blue-500"
+                      }`}
                   />
                   {activity.id !== RECENT_ACTIVITY.length && (
                     <div className="absolute top-3 left-1/2 -translateX-1/2 w-px h-10 bg-border/50" />

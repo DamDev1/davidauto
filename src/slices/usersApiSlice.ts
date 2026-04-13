@@ -54,6 +54,12 @@ export const usersApiSlice = apiSlice.injectEndpoints({
                 method: 'GET',
             }),
         }),
+        getDashboardStats: builder.query({
+            query: () => ({
+                url: '/dashboard/stats',
+                method: 'GET',
+            }),
+        }),
 
         getCarById: builder.query({
             query: (carId) => ({
@@ -79,4 +85,4 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useUploadImagesMutation, useUpdateCarMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;
+export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useGetDashboardStatsQuery, useUploadImagesMutation, useUpdateCarMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;
