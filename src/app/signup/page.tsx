@@ -1,22 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, Building2, ArrowRight, Car, ShieldCheck, KeyRound } from "lucide-react";
 import Image from "next/image";
-import { useAuth } from "@/contexts/AuthContext";
 import GuestRoute from "@/components/GuestRoute";
 import Otp from "./otp";
-import { toast } from 'react-hot-toast';
 import Information from "./information";
 
 type Step = "form" | "verify";
 
 export default function SignupPage() {
 
-    // Step 1 — registration form
     const [form, setForm] = useState({
         fullName: "",
         email: "",
@@ -28,7 +22,6 @@ export default function SignupPage() {
 
     const [step, setStep] = useState<Step>("form");
 
-    
 
     return (
         <GuestRoute>
