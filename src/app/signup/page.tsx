@@ -47,7 +47,6 @@ export default function SignupPage() {
                         <div className="absolute -inset-1 bg-gradient-to-tr from-primary/30 to-purple-500/20 blur-2xl opacity-50 z-[-1]" />
 
                         <AnimatePresence mode="wait">
-                            {/* ── STEP 1: Registration Form ── */}
                             {step === "form" && (
                                 <Information
                                     form={form}
@@ -56,7 +55,6 @@ export default function SignupPage() {
                                 />
                             )}
 
-                            {/* ── STEP 2: OTP Verification ── */}
                             {step === "verify" && (
                                 <Otp
                                     form={form}

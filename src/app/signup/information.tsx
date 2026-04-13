@@ -72,7 +72,6 @@ export default function Information({ form, setStep, setForm }: {
                     </div>
                 </div>
 
-                {/* Dealership Name */}
                 <div>
                     <label htmlFor="dealershipName" className="block text-sm font-medium text-gray-300 mb-1.5">
                         Dealership Name <span className="text-muted-foreground font-normal">(optional)</span>
@@ -85,7 +84,6 @@ export default function Information({ form, setStep, setForm }: {
                     </div>
                 </div>
 
-                {/* Password */}
                 <div>
                     <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-1.5">Password</label>
                     <div className="relative">
@@ -95,8 +93,7 @@ export default function Information({ form, setStep, setForm }: {
                             placeholder="Min. 6 characters" required />
                     </div>
                 </div>
-
-                {/* Confirm Password */}
+                
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1.5">Confirm Password</label>
                     <div className="relative">

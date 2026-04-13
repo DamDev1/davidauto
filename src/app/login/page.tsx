@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Car } from "lucide-react";
+import { Mail, Lock, ArrowRight, Car, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import GuestRoute from "@/components/GuestRoute";
@@ -144,10 +144,14 @@ export default function LoginPage() {
                   className="w-full flex justify-center items-center py-3.5 px-4 border border-transparent rounded-xl shadow-sm text-base font-medium text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary focus:ring-offset-background transition-all hover:scale-[1.02] active:scale-[0.98] group relative overflow-hidden"
                 >
                   <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
-                  <span className="relative flex items-center">
-                    Sign In
-                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
-                  </span>
+                  {isLoading ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <span className="relative flex items-center">
+                      Sign In
+                      <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                    </span>
+                  )}
                 </button>
               </motion.div>
             </form>
