@@ -1,23 +1,53 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Upload, CheckCircle } from "lucide-react";
+import { ArrowLeft, Upload, CheckCircle, CheckCircle2, Plus, X, Camera } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts/AuthContext";
+import toast from "react-hot-toast";
+
+const CAR_DATA: Record<string, string[]> = {
+  Toyota: ["Camry", "Corolla", "RAV4", "Highlander", "Tacoma"],
+  Honda: ["Civic", "Accord", "CR-V", "Pilot", "Odyssey"],
+  Ford: ["Mustang", "F-150", "Explorer", "Escape", "Bronco"],
+  Porsche: ["911", "Cayenne", "Macan", "Panamera", "Taycan"],
+  BMW: ["3 Series", "5 Series", "X3", "X5", "M4"],
+  Mercedes: ["C-Class", "E-Class", "S-Class", "GLE", "G-Wagon"],
+  Audi: ["A4", "A6", "Q5", "Q7", "R8"],
+  Lexus: ["IS", "ES", "RX", "GX", "LX"],
+  Chevrolet: ["Silverado", "Equinox", "Tahoe", "Corvette"],
+  Nissan: ["Altima", "Sentra", "Rogue", "Pathfinder"]
+};
+
+const YEARS = Array.from({ length: 30 }, (_, i) => new Date().getFullYear() + 1 - i);
+const COLORS = ["Black", "White", "Silver", "Gray", "Red", "Blue", "Green", "Brown", "Other"];
+const TRANSMISSIONS = ["Automatic", "Manual", "CVT", "Dual-Clutch"];
+const FUEL_TYPES = ["Petrol", "Diesel", "Hybrid", "Electric", "Plug-in Hybrid"];
+const ENGINE_SIZES = ["1.0L", "1.5L", "2.0L", "2.5L", "3.0L", "4.0L", "5.0L", "5.0L+", "Electric", "Other"];
 
 export default function AddCarPage() {
+  const { createCar, uploadImages } = useAuth();
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [images, setImages] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     make: "",
     model: "",
-    year: new Date().getFullYear().toString(),
+    year: "",
     price: "",
     mileage: "",
-    transmission: "Automatic",
-    fuelType: "Gasoline",
+    vin: "",
+    color: "",
+    transmission: "",
+    fuelType: "",
+    engineSize: "",
+    location: "",
     description: "",
+    features: [] as string[],
   });
 
   const handleChange = (
@@ -31,16 +61,106 @@ export default function AddCarPage() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      router.push("/dashboard/cars");
-    }, 1500);
+  const toggleFeature = (feature: string) => {
+    setFormData(prev => ({
+      ...prev,
+      features: prev.features.includes(feature)
+        ? prev.features.filter(f => f !== feature)
+        : [...prev.features, feature]
+    }));
   };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setImages((prev) => [...prev, ...newFiles].slice(0, 10)); // Max 10 images
+    }
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (images.length === 0) {
+      toast.error("Please upload at least one image.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // 1. Upload Images
+      const uploadedUrls = await uploadImages(images) as string[];
+
+      // 2. Submit Listing with URLs
+      await createCar({
+        ...formData,
+        images: uploadedUrls,
+      });
+
+      setSuccess(true);
+      toast.success("Car listing published successfully!");
+    } catch (error) {
+      console.error(error);
+      toast.error("An error occurred while submitting the listing.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const featuresItem = [
+    "Sunroof",
+    "Leather Seats",
+    "Navigation System",
+    "Heated Seats",
+    "Backup Camera",
+    "Bluetooth",
+    "Apple CarPlay",
+    "Android Auto",
+    "Blind Spot Monitor",
+    "Lane Departure Warning",
+    "Adaptive Cruise Control",
+    "Premium Sound",
+    "Third Row Seating",
+    "Tow Package",
+    "Power Liftgate",
+    "Keyless Entry"
+  ]
+
+  if (success) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md text-center p-8 rounded-3xl border border-border/50 bg-card/50 backdrop-blur-md shadow-2xl"
+        >
+          <div className="w-20 h-20 bg-green-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <CheckCircle2 className="w-10 h-10 text-green-500" />
+          </div>
+          <h2 className="text-3xl font-bold mb-4 font-outfit">Listing Published!</h2>
+          <p className="text-muted-foreground mb-8">
+            Your vehicle has been successfully listed on the marketplace.
+          </p>
+          <div className="space-y-3">
+            <Link
+              href="/dashboard/cars"
+              className="flex items-center justify-center w-full px-6 py-3 rounded-xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all hover:scale-[1.02]"
+            >
+              Go to Dashboard
+            </Link>
+            <button
+              onClick={() => window.location.reload()}
+              className="flex items-center justify-center w-full px-6 py-3 rounded-xl bg-secondary/50 text-foreground font-medium hover:bg-secondary transition-all"
+            >
+              Add Another Vehicle
+            </button>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -66,9 +186,20 @@ export default function AddCarPage() {
             <h2 className="text-xl font-semibold mb-4 text-foreground/90">
               Vehicle Photos
             </h2>
-            <div className="border-2 border-dashed border-border/50 rounded-2xl p-10 flex flex-col items-center justify-center text-center bg-secondary/20 hover:bg-secondary/40 transition-colors cursor-pointer group">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-border/50 rounded-2xl p-10 flex flex-col items-center justify-center text-center bg-secondary/20 hover:bg-secondary/40 transition-colors cursor-pointer group"
+            >
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                className="hidden"
+                ref={fileInputRef}
+                onChange={handleImageChange}
+              />
               <div className="w-16 h-16 rounded-full bg-secondary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <Upload className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Camera className="w-8 h-8 text-muted-foreground group-hover:text-primary transition-colors" />
               </div>
               <h3 className="text-lg font-medium mb-1">
                 Upload High-Quality Images
@@ -84,6 +215,35 @@ export default function AddCarPage() {
                 Browse Files
               </button>
             </div>
+
+            {images.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 mt-6">
+                {images.map((file, index) => (
+                  <div key={index} className="relative aspect-square rounded-xl overflow-hidden border border-border/50 bg-secondary group">
+                    <img
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${index}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        removeImage(index);
+                      }}
+                      className="absolute top-2 right-2 p-1.5 bg-background/80 hover:bg-destructive hover:text-destructive-foreground backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                    {index === 0 && (
+                      <div className="absolute bottom-0 left-0 right-0 bg-primary/90 text-primary-foreground text-[10px] font-bold py-1 text-center">
+                        COVER PHOTO
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           <div className="h-px bg-border/50 w-full" />
@@ -101,16 +261,19 @@ export default function AddCarPage() {
                 >
                   Make
                 </label>
-                <input
-                  type="text"
+                <select
                   id="make"
                   name="make"
                   required
                   value={formData.make}
                   onChange={handleChange}
-                  placeholder="e.g. Porsche, Mercedes-Benz"
-                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50"
-                />
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                >
+                  <option value="" disabled>Select Make</option>
+                  {Object.keys(CAR_DATA).map(make => (
+                    <option key={make} value={make}>{make}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label
@@ -119,16 +282,20 @@ export default function AddCarPage() {
                 >
                   Model
                 </label>
-                <input
-                  type="text"
+                <select
                   id="model"
                   name="model"
                   required
+                  disabled={!formData.make}
                   value={formData.model}
                   onChange={handleChange}
-                  placeholder="e.g. 911 Carrera, G-Class"
-                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50"
-                />
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none disabled:opacity-50"
+                >
+                  <option value="" disabled>Select Model</option>
+                  {formData.make && CAR_DATA[formData.make]?.map(model => (
+                    <option key={model} value={model}>{model}</option>
+                  ))}
+                </select>
               </div>
               <div className="space-y-2">
                 <label
@@ -137,16 +304,36 @@ export default function AddCarPage() {
                 >
                   Year
                 </label>
-                <input
-                  type="number"
+                <select
                   id="year"
                   name="year"
                   required
-                  min="1900"
-                  max={new Date().getFullYear() + 1}
                   value={formData.year}
                   onChange={handleChange}
-                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                >
+                  <option value="" disabled>Select Year</option>
+                  {YEARS.map(year => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="location"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Location
+                </label>
+                <input
+                  type="text"
+                  id="location"
+                  name="location"
+                  required
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="e.g. Lagos, Nigeria"
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50"
                 />
               </div>
               <div className="space-y-2">
@@ -167,6 +354,45 @@ export default function AddCarPage() {
                   placeholder="250000"
                   className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50"
                 />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="vin"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  VIN Number
+                </label>
+                <input
+                  type="text"
+                  id="vin"
+                  name="vin"
+                  required
+                  value={formData.vin}
+                  onChange={handleChange}
+                  placeholder="17-digit VIN"
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="color"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Exterior Color
+                </label>
+                <select
+                  id="color"
+                  name="color"
+                  required
+                  value={formData.color}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                >
+                  <option value="" disabled>Select Color</option>
+                  {COLORS.map(color => (
+                    <option key={color} value={color}>{color}</option>
+                  ))}
+                </select>
               </div>
             </div>
           </section>
@@ -208,13 +434,15 @@ export default function AddCarPage() {
                 <select
                   id="transmission"
                   name="transmission"
+                  required
                   value={formData.transmission}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
                 >
-                  <option value="Automatic">Automatic</option>
-                  <option value="Manual">Manual</option>
-                  <option value="Semi-Auto">Semi-Auto</option>
+                  <option value="" disabled>Select Transmission</option>
+                  {TRANSMISSIONS.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
                 </select>
               </div>
               <div className="space-y-2">
@@ -227,15 +455,36 @@ export default function AddCarPage() {
                 <select
                   id="fuelType"
                   name="fuelType"
+                  required
                   value={formData.fuelType}
                   onChange={handleChange}
                   className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
                 >
-                  <option value="Gasoline">Gasoline</option>
-                  <option value="Diesel">Diesel</option>
-                  <option value="Electric">Electric</option>
-                  <option value="Hybrid">Hybrid</option>
-                  <option value="Plug-in Hybrid">Plug-in Hybrid</option>
+                  <option value="" disabled>Select Fuel Type</option>
+                  {FUEL_TYPES.map(ft => (
+                    <option key={ft} value={ft}>{ft}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <label
+                  htmlFor="engineSize"
+                  className="text-sm font-medium text-muted-foreground"
+                >
+                  Engine Size
+                </label>
+                <select
+                  id="engineSize"
+                  name="engineSize"
+                  required
+                  value={formData.engineSize}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all appearance-none"
+                >
+                  <option value="" disabled>Select Engine Size</option>
+                  {ENGINE_SIZES.map(es => (
+                    <option key={es} value={es}>{es}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -265,6 +514,34 @@ export default function AddCarPage() {
                 placeholder="Describe the vehicle's condition, features, history, and any modifications..."
                 className="w-full px-4 py-3 rounded-xl bg-background/50 border border-border/50 focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-muted-foreground/50 resize-y"
               />
+            </div>
+          </section>
+
+          <div className="h-px bg-border/50 w-full" />
+
+          <section>
+            <h2 className="text-xl font-semibold mb-4 text-foreground/90">
+              Premium Features
+            </h2>
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+              {featuresItem.map((feature) => (
+                <button
+                  key={feature}
+                  type="button"
+                  onClick={() => toggleFeature(feature)}
+                  className={`flex items-center gap-2 p-3 rounded-xl border transition-all text-sm font-medium ${formData.features.includes(feature)
+                    ? "bg-primary/20 border-primary text-primary"
+                    : "bg-background/50 border-border/50 text-muted-foreground hover:border-border"
+                    }`}
+                >
+                  {formData.features.includes(feature) ? (
+                    <CheckCircle className="w-4 h-4" />
+                  ) : (
+                    <div className="w-4 h-4 rounded-full border border-current opacity-50" />
+                  )}
+                  {feature}
+                </button>
+              ))}
             </div>
           </section>
 

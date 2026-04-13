@@ -136,7 +136,7 @@ export default function CarDetailsPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-5 w-5 text-green-500" />
-                  <span className="text-foreground">{car?.seller}</span>
+                  <span className="text-foreground capitalize">{car?.dealerId?.dealershipName}</span>
                 </div>
               </div>
             </div>
@@ -199,17 +199,17 @@ export default function CarDetailsPage() {
                 </p>
               </div>
 
-              {/* <div>
+              <div>
                 <h3 className="text-xl font-bold mb-4">Premium Features</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {car?.features.map((feature, i) => (
+                  {car?.features?.map((feature: string, i: number) => (
                     <div key={i} className="flex items-center gap-3">
                       <CheckCircle2 className="h-5 w-5 text-primary" />
                       <span className="text-muted-foreground">{feature}</span>
                     </div>
                   ))}
                 </div>
-              </div> */}
+              </div>
             </motion.div>
           </div>
 

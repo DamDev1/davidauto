@@ -35,12 +35,14 @@ export async function POST(req: NextRequest) {
             fuelType,
             engineSize,
             price,
+            location,
             description,
+            features,
             images,
         } = body;
 
         // Basic validation
-        if (!make || !model || !year || !price || !vin) {
+        if (!make || !model || !year || !price || !vin || !color || !engineSize || !location) {
             return NextResponse.json({ success: false, message: 'Missing required fields' }, { status: 400 });
         }
 
@@ -63,7 +65,9 @@ export async function POST(req: NextRequest) {
             fuelType: fuelType.trim(),
             engineSize: engineSize.trim(),
             price: parseFloat(price as string),
+            location: location.trim(),
             description: description.trim(),
+            features: features || [],
             images: images || [],
             status: 'avaliable', // Set as avaliable by default per the schema
         });

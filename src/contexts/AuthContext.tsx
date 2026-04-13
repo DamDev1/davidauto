@@ -108,6 +108,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const createCar = async (carData: any) => {
         try {
             await createCarMutation(carData).unwrap();
+            router.push('/dashboard/cars')
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to create car. Please try again.");
             throw error;

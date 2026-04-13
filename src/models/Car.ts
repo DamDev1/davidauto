@@ -12,7 +12,9 @@ export interface ICar {
     fuelType: string;
     engineSize: string;
     price: number;
+    location: string;
     description: string;
+    features: string[];
     images: string[];
     status: 'avaliable' | 'sold';
     createdAt: Date;
@@ -35,7 +37,9 @@ const CarSchema = new Schema<ICar>({
     fuelType: { type: String, required: true },
     engineSize: { type: String, required: true },
     price: { type: Number, required: true },
+    location: { type: String, required: true },
     description: { type: String, required: true },
+    features: { type: [String], default: [] },
     images: { type: [String], default: [] },
     status: {
         type: String,
