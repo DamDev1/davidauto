@@ -22,12 +22,7 @@ export default function Navbar() {
           >
             Browse Cars
           </Link>
-          <Link
-            href="/sell"
-            className="transition-colors hover:text-primary text-foreground/80"
-          >
-            Sell Your Car
-          </Link>
+
           <Link
             href="/about"
             className="transition-colors hover:text-primary text-foreground/80"
@@ -66,12 +61,7 @@ export default function Navbar() {
                 <User className="h-5 w-5 mr-2" />
                 Sign In
               </Link>
-              <Link
-                href="/sell"
-                className="hidden md:inline-flex h-9 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90"
-              >
-                List Your Car
-              </Link>
+
             </>
           )}
           <button className="md:hidden p-2 text-foreground/80 hover:text-foreground">

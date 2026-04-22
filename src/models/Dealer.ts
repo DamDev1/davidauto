@@ -10,6 +10,7 @@ export interface IDealer extends Document {
     logoUrl?: string;
     role: 'dealer';
     status: 'pending' | 'approved' | 'rejected';
+    whatsapp?: string;
     otp?: string;
     otpExpiresAt?: Date;
     isVerified: boolean;
@@ -59,6 +60,9 @@ const DealerSchema = new Schema<IDealer>({
         type: String,
         enum: ['dealer'],
         default: 'dealer',
+    },
+    whatsapp: {
+        type: String,
     },
     status: {
         type: String,

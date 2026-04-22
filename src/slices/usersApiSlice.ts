@@ -42,6 +42,14 @@ export const usersApiSlice = apiSlice.injectEndpoints({
             }),
         }),
 
+        forgotPassword: builder.mutation({
+            query: (data) => ({
+                url: '/auth/forgot-password',
+                method: 'POST',
+                body: data,
+            }),
+        }),
+
         getCars: builder.query({
             query: () => ({
                 url: '/cars',
@@ -85,4 +93,4 @@ export const usersApiSlice = apiSlice.injectEndpoints({
     }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useGetDashboardStatsQuery, useUploadImagesMutation, useUpdateCarMutation, useResendOtpMutation, useGetCarByIdQuery } = usersApiSlice;
+export const { useLoginMutation, useRegisterMutation, useVerifyEmailMutation, useCreateCarMutation, useGetCarsQuery, useGetMyCarsQuery, useGetDashboardStatsQuery, useUploadImagesMutation, useUpdateCarMutation, useResendOtpMutation, useGetCarByIdQuery, useForgotPasswordMutation } = usersApiSlice;

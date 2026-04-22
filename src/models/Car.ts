@@ -17,6 +17,7 @@ export interface ICar {
     features: string[];
     images: string[];
     status: 'available' | 'sold';
+    views: number;
     createdAt: Date;
     updatedAt: Date;
 }
@@ -46,6 +47,7 @@ const CarSchema = new Schema<ICar>({
         enum: ['available', 'sold'],
         default: 'available',
     },
+    views: { type: Number, default: 0 },
 }, {
     timestamps: true,
 });

@@ -8,14 +8,23 @@ import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 import GuestRoute from "@/components/GuestRoute";
 
+import { useRouter } from "next/navigation";
+
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login, isLoading } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await login(email, password);
+    try {
+      await login(email, password);
+    } catch (error: any) {
+      if (error?.data?.message === 'Please verify your email before logging in.') {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      }
+    }
   };
 
   return (

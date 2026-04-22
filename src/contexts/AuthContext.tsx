@@ -4,7 +4,7 @@ import { createContext, useContext, ReactNode, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { setCredentials, logout as logoutAction } from '@/slices/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { useCreateCarMutation, useLoginMutation, useRegisterMutation, useUploadImagesMutation, useVerifyEmailMutation, useResendOtpMutation } from '@/slices/usersApiSlice';
+import { useCreateCarMutation, useLoginMutation, useRegisterMutation, useUploadImagesMutation, useVerifyEmailMutation, useResendOtpMutation, useForgotPasswordMutation } from '@/slices/usersApiSlice';
 import toast from 'react-hot-toast';
 
 export interface User {
@@ -21,11 +21,12 @@ interface AuthContextType {
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
-    register: (fullName: string, email: string, password: string, dealershipName: string,) => Promise<void>;
+    register: (fullName: string, email: string, password: string, dealershipName: string, whatsapp?: string) => Promise<void>;
     uploadImages: (images: File[]) => Promise<string[]>;
     createCar: (carData: any) => Promise<void>;
     verifyOtp: (email: string, otp: string) => Promise<void>;
     resendOtp: (email: string) => Promise<void>;
+    forgotPassword: (email: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,6 +39,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const [uploadImagesMutation, { isLoading: isUploadingImages }] = useUploadImagesMutation();
     const [verifyOtpMutation, { isLoading: isVerifyingOtp }] = useVerifyEmailMutation();
     const [resendOtpMutation, { isLoading: isResendingOtp }] = useResendOtpMutation();
+    const [forgotPasswordMutation, { isLoading: isForgotPassLoading }] = useForgotPasswordMutation();
     const dispatch = useDispatch();
     const router = useRouter();
 
@@ -77,9 +79,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
-    const register = async (fullName: string, email: string, password: string, dealershipName: string) => {
+    const register = async (fullName: string, email: string, password: string, dealershipName: string, whatsapp?: string) => {
         try {
-            await registerMutation({ fullName, email, password, dealershipName }).unwrap();
+            await registerMutation({ fullName, email, password, dealershipName, whatsapp }).unwrap();
         } catch (error: any) {
             toast.error(error?.data?.message || "Registration failed. Please try again.");
             throw error;
@@ -101,6 +103,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             await resendOtpMutation({ email }).unwrap();
         } catch (error: any) {
             toast.error(error?.data?.message || "Failed to resend OTP. Please try again.");
+            throw error;
+        }
+    };
+
+    const forgotPassword = async (email: string) => {
+        try {
+            await forgotPasswordMutation({ email }).unwrap();
+            toast.success("Password reset instructions sent to your email.");
+        } catch (error: any) {
+            toast.error(error?.data?.message || "Failed to process request. Please try again.");
             throw error;
         }
     };
@@ -133,7 +145,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, isLoading: isLoading || isRegistering || isCreatingCar || isUploadingImages || isVerifyingOtp || isResendingOtp, login, logout, register, createCar, uploadImages, verifyOtp, resendOtp }}>
+        <AuthContext.Provider value={{ user, token, isLoading: isLoading || isRegistering || isCreatingCar || isUploadingImages || isVerifyingOtp || isResendingOtp || isForgotPassLoading, login, logout, register, createCar, uploadImages, verifyOtp, resendOtp, forgotPassword }}>
             {children}
         </AuthContext.Provider>
     );

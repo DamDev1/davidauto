@@ -1,12 +1,16 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Force IPv4 resolution first to avoid EHOSTUNREACH on environments without IPv6 routing
+dns.setDefaultResultOrder('ipv4first');
 
 const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
     port: parseInt(process.env.SMTP_PORT || '587'),
     secure: process.env.SMTP_SECURE === 'true', // true for 465, false for 587
     auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
+        user: "luminspin@gmail.com",
+        pass: "qzfj zowi hisv uzgk"
     },
 });
 

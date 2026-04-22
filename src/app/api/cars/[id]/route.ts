@@ -17,9 +17,13 @@ export async function GET(
             return NextResponse.json({ success: false, message: 'Car ID is required' }, { status: 400 });
         }
 
-        const car = await Car.findById(carId).populate({
+        const car = await Car.findByIdAndUpdate(
+            carId,
+            { $inc: { views: 1 } },
+            { new: true }
+        ).populate({
             path: 'dealerId',
-            select: 'fullName email dealershipName phoneNumber',
+            select: 'fullName email dealershipName phoneNumber whatsapp',
             model: Dealer
         });
 

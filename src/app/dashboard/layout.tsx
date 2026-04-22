@@ -8,7 +8,6 @@ import {
   LayoutDashboard,
   CarFront,
   PlusCircle,
-  Inbox,
   Settings,
   LogOut,
   Menu,
@@ -20,7 +19,6 @@ const NAV_ITEMS = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Manage Cars", href: "/dashboard/cars", icon: CarFront },
   { name: "Add New Car", href: "/dashboard/cars/new", icon: PlusCircle },
-  { name: "Orders & Inquiries", href: "/dashboard/orders", icon: Inbox },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

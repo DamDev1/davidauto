@@ -241,21 +241,20 @@ export default function CarDetailsPage() {
 
               <div className="space-y-4 pt-4 border-t border-border/40">
                 <Link
-                  href={`/checkout/${car?.id}`}
+                  href={car?.dealerId?.whatsapp ? `https://wa.me/${car?.dealerId?.whatsapp.replace(/[^\d+]/g, "")}` : "#"}
+                  onClick={(e) => {
+                    if (!car?.dealerId?.whatsapp) {
+                      e.preventDefault();
+                      alert("This dealer has not provided a WhatsApp contact number.");
+                    }
+                  }}
                   className="w-full flex items-center justify-center rounded-xl bg-primary py-4 text-lg font-bold text-primary-foreground transition-all hover:bg-primary/90 hover:scale-[1.02] shadow-[0_0_20px_rgba(245,158,11,0.2)]"
                 >
-                  Buy Now Direct
+                  Buy Now via WhatsApp
                 </Link>
-                <button className="w-full flex items-center justify-center rounded-xl bg-secondary py-4 text-lg font-bold text-secondary-foreground transition-all hover:bg-secondary/80">
-                  Contact Seller
-                </button>
               </div>
 
               <div className="pt-6 space-y-4 text-sm">
-                {/* <div className="flex justify-between items-center text-muted-foreground pb-4 border-b border-border/40">
-                  <span>Financing available from</span>
-                  <span className="font-bold text-foreground">$3,150 /mo</span>
-                </div> */}
                 <div className="flex items-center gap-3 text-muted-foreground">
                   <ShieldCheck className="h-5 w-5 text-primary" />
                   <span>Kingdavid Buyer Protection</span>

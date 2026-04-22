@@ -31,7 +31,7 @@ export const forgotPasswordTemplate = (otp: string) => `
 
       <!-- Header -->
       <div class="header">
-        <h1>Shownub</h1>
+        <h1>KingDavidAuto</h1>
       </div>
 
       <!-- Body -->
@@ -54,7 +54,7 @@ export const forgotPasswordTemplate = (otp: string) => `
 
       <!-- Footer -->
       <div class="footer">
-        <p>&copy; ${new Date().getFullYear()} Shownub, Inc. All rights reserved.</p>
+        <p>&copy; ${new Date().getFullYear()} KingDavidAuto, Inc. All rights reserved.</p>
         <p style="margin-top: 6px;">
           <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
           <a href="#">Terms of Service</a> &nbsp;·&nbsp;

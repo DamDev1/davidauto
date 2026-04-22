@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
         await connectDB();
 
         const body = await req.json();
-        const { fullName, email, password, phone, dealershipName, location } = body;
+        const { fullName, email, password, phone, dealershipName, location, whatsapp } = body;
 
         // Validate required fields
         if (!fullName || !email || !password) {
@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
             phone: phone?.trim() || undefined,
             dealershipName: dealershipName?.trim() || undefined,
             location: location?.trim() || undefined,
+            whatsapp: whatsapp?.trim() || undefined,
             otp,
             otpExpiresAt,
             isVerified: false,

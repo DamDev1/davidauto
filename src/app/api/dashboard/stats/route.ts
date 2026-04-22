@@ -27,8 +27,6 @@ export async function GET(req: NextRequest) {
         const stats = {
             activeListings: cars.filter(car => car.status === 'available').length,
             totalViews: cars.reduce((acc, car) => acc + (car.views || 0), 0),
-            salesVolume: cars.filter(car => car.status === 'sold').reduce((acc, car) => acc + (car.price || 0), 0),
-            newInquiries: 0, // Mock for now
         };
 
         return NextResponse.json({

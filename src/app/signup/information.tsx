@@ -1,5 +1,5 @@
 import React from 'react'
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Car, User, Mail, Building2, Lock, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
 import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,7 +12,7 @@ export default function Information({ form, setStep, setForm }: {
 }) {
 
     const { register, isLoading } = useAuth();
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm((prev: any) => ({ ...prev, [e.target.name]: e.target.value }));
     };
     const handleRegister = async (e: React.FormEvent) => {
@@ -27,7 +27,8 @@ export default function Information({ form, setStep, setForm }: {
             return;
         }
         try {
-            await register(form.fullName, form.email, form.password, form.dealershipName);
+            const fullWhatsapp = form.whatsapp ? `${form.whatsappCode}${form.whatsapp.replace(/^0+/, '')}` : undefined;
+            await register(form.fullName, form.email, form.password, form.dealershipName, fullWhatsapp);
             toast.success("Registration successful! Please verify your email.");
             setStep("verify");
         } catch (err: any) {
@@ -78,9 +79,35 @@ export default function Information({ form, setStep, setForm }: {
                     </label>
                     <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><Building2 className="h-5 w-5 text-muted-foreground" /></div>
-                        <input type="text" id="dealershipName" name="dealershipName" value={form.dealershipName} onChange={handleChange}
+                        <input type="text" id="dealershipName" name="dealershipName" value={form.dealershipName || ''} onChange={handleChange}
                             className="block w-full pl-10 pr-3 py-3 border border-border/50 rounded-xl bg-background/50 text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
                             placeholder="Kingdavid Motors Ltd." />
+                    </div>
+                </div>
+
+                <div>
+                    <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-300 mb-1.5">
+                        WhatsApp Number <span className="text-muted-foreground font-normal">(optional)</span>
+                    </label>
+                    <div className="flex gap-2">
+                        <select
+                            name="whatsappCode"
+                            value={form.whatsappCode || '+1'}
+                            onChange={handleChange}
+                            className="w-[80px] block px-3 py-3 border border-border/50 rounded-xl bg-background/50 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                        >
+                            <option value="+1">+1</option>
+                            <option value="+44">+44</option>
+                            <option value="+27">+27</option>
+                            <option value="+91">+91</option>
+                            <option value="+61">+61</option>
+                            <option value="+234">+234</option>
+                        </select>
+                        <div className="relative flex-1">
+                            <input type="text" id="whatsapp" name="whatsapp" value={form.whatsapp || ''} onChange={handleChange}
+                                className="block w-full pl-4 pr-3 py-3 border border-border/50 rounded-xl bg-background/50 text-white placeholder-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
+                                placeholder="8012345678" />
+                        </div>
                     </div>
                 </div>
 
@@ -93,7 +120,7 @@ export default function Information({ form, setStep, setForm }: {
                             placeholder="Min. 6 characters" required />
                     </div>
                 </div>
-                
+
                 <div>
                     <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-300 mb-1.5">Confirm Password</label>
                     <div className="relative">
@@ -110,7 +137,7 @@ export default function Information({ form, setStep, setForm }: {
                         <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-white/0 via-white/10 to-white/0 -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
                         <span className="relative flex items-center">
                             {isLoading ? (
-                               <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                                <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
                             ) : (<>Create Account<ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" /></>)}
                         </span>
                     </button>
